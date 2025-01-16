@@ -26,6 +26,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 logs/*.log
+data/*.pkl
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

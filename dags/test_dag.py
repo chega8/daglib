@@ -6,6 +6,7 @@ from loguru import logger
 # Example usage (optional)
 # -----------------------
 if __name__ == "__main__":
+
     # Example tasks
     def task_func_1(context):
         logger.debug("Task 1 is running.")

@@ -1,4 +1,5 @@
 import json
+from daglib.utils import render_dag_status
 import dill
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
@@ -143,3 +144,5 @@ class DAGExecutor:
             logger.info(f"DAG '{dag.dag_id}' execution completed successfully.")
         else:
             logger.warning(f"DAG '{dag.dag_id}' ended in FAILED state.")
+            
+        print(render_dag_status(dag))
