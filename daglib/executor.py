@@ -82,7 +82,7 @@ class DAGExecutor:
     def __init__(self):
         pass
 
-    def run(self, dag: DAG, context: Optional[Dict[str, Any]] = None) -> None:
+    def run(self, dag: DAG, context: Optional[Dict[str, Any]] = None, rerun: bool = False) -> None:
         """
         - Parse the DAG
         - Resolve dependencies and run tasks in order
@@ -104,8 +104,11 @@ class DAGExecutor:
             for task_id in list(remaining_tasks):
                 task = dag.get_task(task_id)
                 
+                if task.state == TaskState.SUCCESS and rerun:
+                    remaining_tasks.remove(task_id)
+                    continue
+                
                 if all(dag.get_task(dep).state == TaskState.SUCCESS for dep in task.dependencies):
-                    logger.info(f"All dependencies satisfied for task '{task_id}'. Executing now.")
                     task.run(context)
 
                     if task.state == TaskState.FAILED:
@@ -119,7 +122,7 @@ class DAGExecutor:
             if not made_progress and remaining_tasks:
                 logger.error(
                     f"No progress made for DAG '{dag.dag_id}', "
-                    f"remaining tasks: {remaining_tasks}. Possible dependency deadlock or failed tasks."
+                    f"remaining tasks: {remaining_tasks}."
                 )
                 dag.state = DAGState.FAILED
                 break

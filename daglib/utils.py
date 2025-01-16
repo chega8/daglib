@@ -25,7 +25,7 @@ def render_dag_status(dag) -> str:
         color = color_map.get(task.state.name, "")
         reset = color_map["RESET"]
         lines.append(
-            f"  {task_id} -> [{deps}] | state: {color}{task.state.name}{reset}"
+            f"  {task_id} <- [{deps}] | state: {color}{task.state.name}{reset}"
         )
     lines.append("============================\n")
     
