@@ -2,9 +2,6 @@ from daglib.task import Task, TaskState, BashTask
 from daglib.executor import DAG, DAGState, DAGExecutor
 from loguru import logger
 
-# -----------------------
-# Example usage (optional)
-# -----------------------
 if __name__ == "__main__":
 
     # Example tasks

@@ -4,7 +4,6 @@ import dill
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 from loguru import logger
-import subprocess
 
 from daglib.task import Task, TaskState
 import datetime
@@ -14,13 +13,10 @@ log_name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
 logger.add(
     f"logs/{log_name}.log",
     format="{time} {level} {message}",
-    rotation="10 MB",     # When the log file reaches 10MB, it will be rotated
-    compression="zip"     # Archive old logs using zip
+    rotation="10 MB",     
+    compression="zip"     
 )
 
-# -----------------------------
-# Enums for Task and DAG states
-# -----------------------------
 
 class DAGState(Enum):
     PENDING = "PENDING"
@@ -28,13 +24,6 @@ class DAGState(Enum):
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
 
-# -----------------------------------
-# Task: holds function and dependencies
-# -----------------------------------
-
-# ---------------------------------
-# DAG: holds tasks and DAG-level data
-# ---------------------------------
 class DAG:
     """
     Represents a Directed Acyclic Graph (DAG) of tasks.
@@ -86,9 +75,6 @@ class DAG:
         return f"<DAG {self.dag_id} (state={self.state})>"
 
             
-# -------------------------------------------------------
-# DAGExecutor: orchestrates the execution of the DAG tasks
-# -------------------------------------------------------
 class DAGExecutor:
     """
     Executes the tasks in a DAG sequentially (or in a simplified dependency-aware order).
@@ -126,7 +112,6 @@ class DAGExecutor:
                         dag.errors[task_id] = task.result
                         logger.error(f"Task '{task_id}' caused DAG '{dag.dag_id}' to fail.")
                         dag.state = DAGState.FAILED
-                        # Continue or break depending on your desired behavior.
                     
                     remaining_tasks.remove(task_id)
                     made_progress = True

@@ -25,7 +25,7 @@ class Task:
         self.dependencies = dependencies if dependencies else []
         
         self.state = TaskState.PENDING
-        self.result: Any = None  # Store success result or error info
+        self.result: Any = None 
 
     def run(self, context: Dict[str, Any]) -> None:
         """
@@ -82,8 +82,6 @@ class BashTask(Task):
         script_args: Optional[List[str]] = None, 
         dependencies: Optional[List[str]] = None
     ):
-        # Instead of passing a user-defined function, we'll use an internal callable
-        # that runs the Bash script and checks the return code.
         super().__init__(
             task_id=task_id, 
             func=self._run_script, 
@@ -99,17 +97,12 @@ class BashTask(Task):
         """
         logger.info(f"Executing Bash script: {self.script_path} with args: {self.script_args}")
         
-        # Run the script in a subprocess (blocking call here).
-        # For truly "background" execution while continuing, you could use Popen
-        # and track the process handle, but for DAG orchestration, you typically
-        # want to wait until the script finishes to proceed to the next task.
         proc = subprocess.run(
             [self.script_path, *self.script_args],
             capture_output=True,
             text=True
         )
 
-        # Check if the script executed successfully
         if proc.returncode == 0:
             logger.info(f"Bash script '{self.script_path}' completed with exit code 0.")
             return {}
@@ -118,7 +111,7 @@ class BashTask(Task):
             error += f"\nStderr: {proc.stderr}"
             logger.error(error)
             self.result = error
-            # Raise an exception to mark this task as FAILED
+
             raise RuntimeError(
                 f"Script '{self.script_path}' returned non-zero exit code: {proc.returncode}"
             )

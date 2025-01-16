@@ -20,11 +20,8 @@ def render_dag_status(dag) -> str:
     lines.append(f"Overall DAG State: {color_map.get(dag.state.name, '')}{dag.state.name}{color_map['RESET']}")
     lines.append("")
 
-    # Sort tasks by name just for a consistent order
     for task_id, task in sorted(dag.tasks.items(), key=lambda x: x[0]):
-        # Dependencies as a comma-separated list
         deps = ", ".join(task.dependencies) if task.dependencies else "(none)"
-        # Colorize the state
         color = color_map.get(task.state.name, "")
         reset = color_map["RESET"]
         lines.append(
