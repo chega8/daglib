@@ -105,6 +105,7 @@ class BashTask(Task):
 
         if proc.returncode == 0:
             logger.info(f"Bash script '{self.script_path}' completed with exit code 0.")
+            self.state = TaskState.SUCCESS
             return {}
         else:
             error = f"Script '{self.script_path}' returned non-zero exit code: {proc.returncode}"
@@ -115,3 +116,44 @@ class BashTask(Task):
             raise RuntimeError(
                 f"Script '{self.script_path}' returned non-zero exit code: {proc.returncode}"
             )
+            
+class CMDTask(Task):
+    """
+    A specialized Task that executes a command.
+    It is considered SUCCESS if the command returns exit code 0, otherwise FAILED.
+    """
+    def __init__(
+        self,
+        task_id: str,
+        cmd: str,
+        dependencies: Optional[List[str]] = None
+    ):
+        super().__init__(task_id, func=self._run_cmd, dependencies=dependencies)
+        self.cmd = cmd
+
+    def _run_cmd(self, context: Dict[str, Any]) -> None:
+        """
+        Executes the specified CMD command via subprocess.
+        Raises an exception if the command returns a non-zero exit code.
+        """
+        logger.info(f"Executing CMD: {self.cmd}")
+        
+        # 'shell=True' allows us to pass a single string command:
+        proc = subprocess.run(
+            self.cmd, 
+            shell=True,
+            capture_output=True,
+            text=True
+        )
+
+        if proc.returncode != 0:
+            error = f"Command '{self.cmd}' failed with exit code {proc.returncode}. "
+            error += f"\nSTDERR:\n{proc.stderr}"
+            logger.error(error)
+            self.result = error
+            raise RuntimeError(
+                f"CMD '{self.cmd}' returned non-zero exit code: {proc.returncode}"
+            )
+        else:
+            logger.info(f"CMD '{self.cmd}' completed successfully. STDOUT:\n{proc.stdout}")
+            self.state = TaskState.SUCCESS
