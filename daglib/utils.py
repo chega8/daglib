@@ -1,4 +1,7 @@
+import os
+import time
 import requests
+import yaml
 
 from daglib.task import TaskState
 
@@ -56,7 +59,6 @@ def parse_job_name(txt_logs):
         print("No output from the command.")
         return None
 
-
 def check_job_status(job_name, region='SR006'):
     try:
         import client_lib
@@ -80,3 +82,29 @@ def recursively_mark_dependency_pending(dag, task_id):
     
     for dep_id in task.dependencies:
         recursively_mark_dependency_pending(dag, dep_id)
+        
+def update_config(file_path, **kwargs):
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as f:
+            data = yaml.safe_load(f)
+    else:
+        data = {}
+
+    if isinstance(data, str):
+        data = {}
+  
+    for k, v in kwargs.items():
+        data[k] = v
+
+    with open(file_path, 'w') as f:
+        yaml.safe_dump(data, f, sort_keys=False)
+  
+def check_cloud_task_done(job_name, sleep=60*60):
+    if job_name is not None:
+        while True:
+            status = check_job_status(job_name)
+            if status == 'Completed':
+                return
+            if status == 'Failed':
+                raise Exception(f'job {job_name} Failed')
+            time.sleep(sleep)
