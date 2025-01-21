@@ -68,6 +68,6 @@ def check_job_status(job_name, region='SR006'):
         headers={"X-Api-Key": client_lib.environment.GW_API_KEY, "X-Namespace": client_lib.environment.NAMESPACE},
     )
     if r.status_code == 200:
-        print(f'Job status={r.json().get("job_status")}')
+        return r.json().get("job_status")
     else:
         return f"Cant get status for job, check job_name"
