@@ -1,3 +1,5 @@
+import requests
+
 def render_dag_status(dag) -> str:
     """
     Returns a multi-line string with colorful DAG status:
@@ -30,3 +32,20 @@ def render_dag_status(dag) -> str:
     lines.append("============================\n")
     
     return "\n".join(lines)
+
+def check_job_status(job_name, region='SR006'):
+    try:
+        import client_lib
+    except ImportError:
+        print("Client library not found.")
+        return
+    
+    r = requests.get(
+        f"http://{client_lib.environment.GW_API_ADDR}/job_status",
+        params={"job": job_name, "region": region},
+        headers={"X-Api-Key": client_lib.environment.GW_API_KEY, "X-Namespace": client_lib.environment.NAMESPACE},
+    )
+    if r.status_code == 200:
+        print(f'Job status={r.json().get("job_status")}')
+    else:
+        return f"Cant get status for job, check job_name"
