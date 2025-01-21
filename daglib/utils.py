@@ -33,6 +33,29 @@ def render_dag_status(dag) -> str:
     
     return "\n".join(lines)
 
+def parse_job_name(txt_logs):
+    import subprocess
+    import re
+
+    # output = proc.stdout.strip()
+
+    pattern = r"lm-mpi-job-\b[\w-]+\b"
+
+    lines = txt_logs.splitlines()
+    if lines:
+        last_line = lines[-1]
+        match = re.search(pattern, last_line)
+        if match:
+            job_id = match.group(0)
+            return job_id
+        else:
+            print("No job ID found in the last line.")
+            return None
+    else:
+        print("No output from the command.")
+        return None
+
+
 def check_job_status(job_name, region='SR006'):
     try:
         import client_lib
