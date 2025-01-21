@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 from loguru import logger
 import subprocess
+import inspect
 
 class TaskState(Enum):
     PENDING = "PENDING"
@@ -55,6 +56,7 @@ class Task:
             "status": self.status.value,
             "error": self.error,
             "result": self.result,
+            "func_hash": inspect.getsource(self.func)
         }
 
     @staticmethod
