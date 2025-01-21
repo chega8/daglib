@@ -37,8 +37,7 @@ def parse_job_name(txt_logs):
     import subprocess
     import re
 
-    # output = proc.stdout.strip()
-
+    txt_logs = txt_logs.strip()
     pattern = r"lm-mpi-job-\b[\w-]+\b"
 
     lines = txt_logs.splitlines()

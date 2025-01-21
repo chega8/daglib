@@ -7,6 +7,7 @@ from loguru import logger
 import subprocess
 import inspect
 
+
 class TaskState(Enum):
     PENDING = "PENDING"
     RUNNING = "RUNNING"
@@ -110,13 +111,8 @@ class BashTask(Task):
             self.state = TaskState.SUCCESS
             return {}
         else:
-            error = f"Script '{self.script_path}' returned non-zero exit code: {proc.returncode}"
-            error += f"\nStderr: {proc.stderr}"
-            logger.error(error)
-            self.result = error
-
             raise RuntimeError(
-                f"Script '{self.script_path}' returned non-zero exit code: {proc.returncode}"
+                f"Script '{self.script_path}' returned non-zero exit code: {proc.returncode}\nStderr: {proc.stderr}"
             )
             
 class CMDTask(Task):
@@ -140,7 +136,6 @@ class CMDTask(Task):
         """
         logger.info(f"Executing CMD: {self.cmd}")
         
-        # 'shell=True' allows us to pass a single string command:
         proc = subprocess.run(
             self.cmd, 
             shell=True,
@@ -149,13 +144,9 @@ class CMDTask(Task):
         )
 
         if proc.returncode != 0:
-            error = f"Command '{self.cmd}' failed with exit code {proc.returncode}. "
-            error += f"\nSTDERR:\n{proc.stderr}"
-            logger.error(error)
-            self.result = error
             raise RuntimeError(
-                f"CMD '{self.cmd}' returned non-zero exit code: {proc.returncode}"
+                f"CMD '{self.cmd}' returned non-zero exit code: {proc.returncode}\nSTDERR:\n{proc.stderr}"
             )
         else:
             logger.info(f"CMD '{self.cmd}' completed successfully. STDOUT:\n{proc.stdout}")
-            self.state = TaskState.SUCCESS
+            return {f'{self.task_id}_output': proc.stdout}
