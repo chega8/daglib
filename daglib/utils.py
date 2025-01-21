@@ -1,6 +1,6 @@
 import requests
 
-from daglib.daglib.task import TaskState
+from daglib.task import TaskState
 
 def render_dag_status(dag) -> str:
     """
