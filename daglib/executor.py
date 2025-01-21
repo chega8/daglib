@@ -1,5 +1,5 @@
 import json
-from daglib.utils import render_dag_status
+from daglib.utils import render_dag_status, recursively_mark_dependency_pending
 import dill
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
@@ -82,7 +82,13 @@ class DAGExecutor:
     def __init__(self):
         pass
 
-    def run(self, dag: DAG, context: Optional[Dict[str, Any]] = None, rerun: bool = False) -> None:
+    def run(
+            self, 
+            dag: DAG, 
+            context: Optional[Dict[str, Any]] = None, 
+            rerun: bool = False, 
+            rerun_from_task_id: str = None
+        ) -> None:
         """
         - Parse the DAG
         - Resolve dependencies and run tasks in order
@@ -108,6 +114,18 @@ class DAGExecutor:
                     remaining_tasks.remove(task_id)
                     continue
                 
+                if rerun_from_task_id is not None:
+                    if rerun_from_task_id in dag.tasks.keys():
+                        if task_id == rerun_from_task_id:
+                            rerun_from_task_id = None
+                            recursively_mark_dependency_pending(dag, task_id)
+                        else:
+                            # Skip this task
+                            continue
+                    else:
+                        logger.error(f"Task '{rerun_from_task_id}' not found in DAG '{dag.dag_id}'.")
+                        break
+                    
                 if all(dag.get_task(dep).state == TaskState.SUCCESS for dep in task.dependencies):
                     task.run(context)
 

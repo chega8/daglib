@@ -1,5 +1,7 @@
 import requests
 
+from daglib.daglib.task import TaskState
+
 def render_dag_status(dag) -> str:
     """
     Returns a multi-line string with colorful DAG status:
@@ -71,3 +73,10 @@ def check_job_status(job_name, region='SR006'):
         return r.json().get("job_status")
     else:
         return f"Cant get status for job, check job_name"
+    
+def recursively_mark_dependency_pending(dag, task_id):
+    task = dag.get_task(task_id)
+    task.state = TaskState.PENDING
+    
+    for dep_id in task.dependencies:
+        recursively_mark_dependency_pending(dag, dep_id)
